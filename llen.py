@@ -8,11 +8,13 @@ with open('queue.json', 'r') as data_file:
 data = json.loads(json_data)
 
 host = data['hosts']
+print(f'HOSTS: {host}')
 g = Gauge('redis_queue_length', 'Length of queues', ['host','queue_name','queue_type'])
 
 def generate():
     for h, q_type in host.items():
         s = h.split(':')
+        print(s)
         r = redis.Redis(host=s[0], port=s[1])
 
         try:
@@ -26,12 +28,14 @@ def generate():
         
             for qname in qlist:
                 a = r.llen(qname)
+                print(f'Getting {qname} - {a}')
                 g.labels(h,qname,q).set(a)
 
 
 metrics_app = make_wsgi_app()
 
 def my_app(environ, start_fn):
+    print(f'START UP - {environ}')
     if environ['PATH_INFO'] == '/metrics':
         generate()
         return metrics_app(environ, start_fn)

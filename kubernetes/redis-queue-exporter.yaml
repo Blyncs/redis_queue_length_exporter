@@ -1,0 +1,113 @@
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: redis-queue-exporter
+  namespace: metrics
+  annotations:
+    repo: "https://github.com/Blyncs/redis_queue_length_exporter"
+  labels:
+    product: payver-pipeline
+    branch: production
+spec:
+  hosts:
+    - api.blyncsy.io
+  gateways:
+    - default/ai-blyncsy-gateway
+  http:
+    - name: "redis-queue-exporter"
+      match:
+        - uri:
+            prefix: "redis-queue-exporter"
+      rewrite:
+        uri: " "
+      route:
+        - destination:
+            host: redis-queue-exporter
+            port:
+              number: 8000
+---
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: redis-queue-exporter-telemetry
+  namespace: metrics
+spec:
+  selector:
+    matchLabels:
+      service.istio.io/canonical-name: redis-queue-exporter
+  tracing:
+  - disableSpanReporting: false
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis-queue-exporter
+  namespace: metrics
+  annotations:
+    repo: "https://github.com/Blyncs/redis_queue_length_exporter"
+  labels:
+    product: payver-pipeline
+    branch: production
+    team: dev
+    k8s-app: redis-metrics # This k8s-app label allows the ServiceMonitor to see this app to get metrics
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+  selector:
+    app: redis-queue-exporter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-queue-exporter
+  namespace: metrics
+  labels:
+    app: redis-queue-exporter
+    product: payver-pipeline
+    branch: production
+#    redis-queue-exporter-auth: enable
+  annotations:
+    repo: "https://github.com/Blyncs/redis-queue-exporter"
+spec:
+  selector:
+    matchLabels:
+#      redis-queue-exporter-auth: enable
+      app: redis-queue-exporter
+  template:
+    metadata:
+      labels:
+        app: redis-queue-exporter
+        product: payver-pipeline
+        branch: production
+#        redis-queue-exporter-auth: enable
+      annotations:
+        repo: "https://github.com/Blyncs/redis-queue-exporter"
+    spec:
+      containers:
+        - name: redis-queue-exporter
+          image: gcr.io/blyncsy/redis-queue-length-exporter:0.5
+          imagePullPolicy: Always #IfNotPresent
+          env:
+            - name: PORT
+              value: "8000"
+            - name: POD_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+      terminationGracePeriodSeconds: 60

@@ -1,30 +1,64 @@
-{  
-   "queue_type":{  
-      "success_request":[  
-        "nginx_queue",
-        "apache_queue"
-      ],
-      "error_request":[  
-        "error_nginx_queue",
-        "error_apache_queue"
-      ],
-      "event_tracker":[  
-        "click_queue",
-        "read_queue"
-      ],
-      "failed_event":[
-        "failed_queue1",
-        "failed_queue2"
-      ]
-   },
-   "hosts":{  
-      "host1.example.com:6379":[
-        "success_request",
-        "event_tracker"
-      ], 
-      "host2.example.com:6379":[
-        "error_request",
-        "failed_events"
-      ]    
-   }
+{
+  "queue_type": {
+    "detections": [
+      "road_paint_quality",
+      "road_paint_quality:1",
+      "road_paint_quality:2",
+      "road_paint_quality:3",
+      "road_paint_quality:4"
+    ],
+    "vizzion-stream-ingestion": [
+      "vizzion",
+      "vizzion:1",
+      "vizzion:2",
+      "vizzion:3",
+      "vizzion:4"
+    ],
+    "vizzion-mirror-updates": [
+      "update_queue",
+      "update_queue:1",
+      "update_queue:2",
+      "update_queue:3",
+      "update_queue:4"
+    ],
+    "vizzion-other-queue": [
+      "other_queue",
+      "other_queue:1",
+      "other_queue:2",
+      "other_queue:3",
+      "other_queue:4"
+    ],
+    "netradyne-videos": [
+      "netradyne-videos",
+      "netradyne-videos:1",
+      "netradyne-videos:2",
+      "netradyne-videos:3",
+      "netradyne-videos:4"
+    ],
+    "netradyne-tasks": [
+      "netradyne-tasks",
+      "netradyne-tasks:1",
+      "netradyne-tasks:2",
+      "netradyne-tasks:3",
+      "netradyne-tasks:4"
+    ],
+    "image-provider": [
+      "image-provider",
+      "image-provider:1",
+      "image-provider:2",
+      "image-provider:3",
+      "image-provider:4"
+    ]
+  },
+  "hosts": {
+    "redis-2-service.payver.svc.cluster.local:6379": [
+      "detections",
+      "vizzion-stream-ingestion",
+      "vizzion-mirror-updates",
+      "vizzion-other-queue",
+      "netradyne-videos",
+      "netradyne-tasks",
+      "image-provider"
+    ]
+  }
 }

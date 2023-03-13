@@ -1,5 +1,7 @@
 FROM python:3
 
+ENV PYTHONUNBUFFERED=0
+
 COPY llen.py ./
 COPY queue.json ./
 
